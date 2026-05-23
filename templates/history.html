@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analysis History</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <main class="page-shell results-shell">
+        <section class="container results-card" aria-labelledby="history-title">
+            <nav class="top-nav" aria-label="Main navigation">
+                <a href="{{ url_for('home') }}">Analyze</a>
+                <a href="{{ url_for('history') }}">History</a>
+            </nav>
+
+            <p class="eyebrow">Saved reports</p>
+            <h1 id="history-title">Resume History</h1>
+            <p class="subtitle">Review previous resume scans and compare how each resume performed for different roles.</p>
+
+            {% if history %}
+                <div class="history-list">
+                    {% for record in history %}
+                        <article class="history-item">
+                            <div>
+                                <p class="history-title">{{ record.filename }}</p>
+                                <p class="history-meta">
+                                    {{ record.target_role }} ·
+                                    ATS {{ record.analysis.ats_score }}% ·
+                                    Match {{ record.analysis.job_match_score }}%
+                                </p>
+                                {% if record.job_description_preview %}
+                                    <p class="history-preview">{{ record.job_description_preview }}</p>
+                                {% endif %}
+                            </div>
+                            <a class="back-link compact-link" href="{{ url_for('history_detail', record_id=record.id) }}">Open Report</a>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <p>No reports saved yet.</p>
+                    <a class="back-link" href="{{ url_for('home') }}">Analyze a Resume</a>
+                </div>
+            {% endif %}
+
+        </section>
+    </main>
+
+</body>
+</html>

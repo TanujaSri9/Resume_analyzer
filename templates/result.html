@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analysis Results</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <main class="page-shell results-shell">
+        <section class="container results-card" aria-labelledby="results-title">
+            <nav class="top-nav" aria-label="Main navigation">
+                <a href="{{ url_for('home') }}">Analyze</a>
+                <a href="{{ url_for('history') }}">History</a>
+            </nav>
+
+            {% if error %}
+                <p class="eyebrow">Analysis failed</p>
+                <h1 id="results-title">Something went wrong</h1>
+                <p class="subtitle">{{ error }}</p>
+                <a class="back-link" href="/">Try Another Resume</a>
+            {% else %}
+                <p class="eyebrow">ATS analysis</p>
+                <h1 id="results-title">Resume Report</h1>
+                <p class="subtitle">{{ analysis.summary }}</p>
+
+                {% if history_record %}
+                    <div class="report-meta">
+                        <span>{{ history_record.filename }}</span>
+                        <span>{{ history_record.target_role }}</span>
+                        {% if history_record.has_job_description %}
+                            <span>Job description matched</span>
+                        {% else %}
+                            <span>Role-only match</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <div class="score-grid">
+                    <div class="score-panel">
+                        <span class="score-label">ATS Score</span>
+                        <strong class="score-value">{{ analysis.ats_score }}%</strong>
+                    </div>
+
+                    <div class="score-panel">
+                        <span class="score-label">Job Match</span>
+                        <strong class="score-value">{{ analysis.job_match_score }}%</strong>
+                    </div>
+
+                    <div class="score-panel">
+                        <span class="score-label">Role Fit</span>
+                        <strong class="score-value">{{ analysis.role_fit_score }}%</strong>
+                    </div>
+                </div>
+
+                <div class="analysis-grid">
+                    <article class="result-section wide-section">
+                        <h2>Job Description Alignment</h2>
+                        <p>{{ analysis.job_description_alignment }}</p>
+                    </article>
+
+                    <article class="result-section">
+                        <h2>Strengths</h2>
+                        <ul>
+                            {% for item in analysis.strengths %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+
+                    <article class="result-section">
+                        <h2>Weaknesses</h2>
+                        <ul>
+                            {% for item in analysis.weaknesses %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+
+                    <article class="result-section">
+                        <h2>Missing Skills</h2>
+                        <ul>
+                            {% for item in analysis.missing_skills %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+
+                    <article class="result-section">
+                        <h2>Improvement Suggestions</h2>
+                        <ul>
+                            {% for item in analysis.improvement_suggestions %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+
+                    <article class="result-section">
+                        <h2>Matched Keywords</h2>
+                        <ul>
+                            {% for item in analysis.matched_keywords %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+
+                    <article class="result-section">
+                        <h2>Missing Job Keywords</h2>
+                        <ul>
+                            {% for item in analysis.missing_job_keywords %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+
+                    <article class="result-section">
+                        <h2>Role-Based Recommendations</h2>
+                        <ul>
+                            {% for item in analysis.role_based_recommendations %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+                </div>
+
+                <a class="back-link" href="/">Analyze Another Resume</a>
+            {% endif %}
+
+        </section>
+    </main>
+
+</body>
+</html>

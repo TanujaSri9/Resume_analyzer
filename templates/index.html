@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <main class="page-shell">
+        <section class="container" aria-labelledby="page-title">
+            <nav class="top-nav" aria-label="Main navigation">
+                <a href="{{ url_for('history') }}">History</a>
+            </nav>
+
+            <p class="eyebrow">Role-aware screening</p>
+            <h1 id="page-title">AI Resume Analyzer</h1>
+            <p class="subtitle">Upload a PDF resume, choose a target role, and compare it with a job description.</p>
+
+            <form id="analyze-form" action="/analyze" method="POST" enctype="multipart/form-data">
+
+                <label class="field-label" for="target-role">Target role</label>
+                <select id="target-role" name="target_role">
+                    {% for role in target_roles %}
+                        <option value="{{ role }}">{{ role }}</option>
+                    {% endfor %}
+                </select>
+
+                <label class="field-label" for="job-description">Job description</label>
+                <textarea
+                    id="job-description"
+                    name="job_description"
+                    rows="7"
+                    placeholder="Paste the job description here for a stronger match report."
+                ></textarea>
+
+                <label class="upload-box">
+                    <span class="upload-icon">PDF</span>
+                    <span class="upload-title">Choose resume file</span>
+                    <span class="upload-hint">PDF files only</span>
+                    <input type="file" name="resume" accept=".pdf" required>
+                </label>
+
+                <button id="analyze-button" type="submit">Analyze Resume</button>
+
+            </form>
+
+        </section>
+    </main>
+
+    <div class="loading-overlay" id="loading-overlay" aria-hidden="true">
+        <div class="loading-panel" role="status" aria-live="polite">
+            <div class="loader-ring" aria-hidden="true"></div>
+            <p class="loading-title">Analyzing your resume</p>
+            <p class="loading-message" id="loading-message">Reading resume details...</p>
+            <div class="progress-track" aria-hidden="true">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
