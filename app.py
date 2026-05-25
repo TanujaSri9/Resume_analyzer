@@ -445,15 +445,16 @@ def history_detail(record_id):
     )
 
 
-@app.route("/download-interview-pdf", methods=["POST"])
-def download_interview_pdf():
-    try:
-        analysis = json.loads(request.form.get("analysis_json", "{}"))
-    except json.JSONDecodeError:
-        return render_template("result.html", error="Could not prepare the interview PDF."), 400
+@app.route("/history/<record_id>/interview-pdf")
+def download_interview_pdf(record_id):
+    history_record = get_history_record(record_id)
 
-    filename = request.form.get("filename", "resume")
-    target_role = request.form.get("target_role", analysis.get("target_role", "General"))
+    if not history_record:
+        return render_template("result.html", error="This interview PDF could not be found."), 404
+
+    analysis = history_record.get("analysis", {})
+    filename = history_record.get("filename", "resume")
+    target_role = history_record.get("target_role", analysis.get("target_role", "General"))
     pdf = build_interview_pdf(analysis, filename, target_role)
     download_name = f"{secure_filename(target_role or 'interview-prep') or 'interview-prep'}-questions.pdf"
 
