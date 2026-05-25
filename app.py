@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, Response, render_template, request, url_for
 from google import genai
 from google.genai import errors as genai_errors
 from werkzeug.exceptions import RequestEntityTooLarge
@@ -24,6 +24,7 @@ ALLOWED_EXTENSIONS = {"pdf"}
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+SITE_URL = os.getenv("SITE_URL", "").rstrip("/")
 HISTORY_FILE = Path(__file__).with_name("data") / "history.json"
 TARGET_ROLES = [
     "General",
@@ -193,6 +194,36 @@ Resume:
 @app.route("/")
 def home():
     return render_template("index.html", target_roles=TARGET_ROLES)
+
+
+@app.route("/robots.txt")
+def robots_txt():
+    sitemap_url = f"{SITE_URL}/sitemap.xml" if SITE_URL else url_for("sitemap_xml", _external=True)
+    robots = f"""User-agent: *
+Allow: /
+Disallow: /analyze
+Disallow: /history
+
+Sitemap: {sitemap_url}
+"""
+    return Response(robots, mimetype="text/plain")
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    base_url = SITE_URL or request.url_root.rstrip("/")
+    updated_at = datetime.now(timezone.utc).date().isoformat()
+    sitemap = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>{base_url}/</loc>
+        <lastmod>{updated_at}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+    </url>
+</urlset>
+"""
+    return Response(sitemap, mimetype="application/xml")
 
 
 @app.errorhandler(RequestEntityTooLarge)
