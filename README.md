@@ -1,6 +1,6 @@
 # AI Resume Analyzer
 
-A Flask web app that analyzes PDF resumes with Gemini and generates ATS-style feedback, job-description matching, role-fit scoring, and saved report history.
+A Flask web app that analyzes PDF resumes with Gemini and generates ATS-style feedback, job-description matching, role-fit scoring, interview preparation, and saved report history.
 
 ## Features
 
@@ -9,6 +9,8 @@ A Flask web app that analyzes PDF resumes with Gemini and generates ATS-style fe
 - Job description matching
 - ATS score, job match score, and role fit score
 - Strengths, weaknesses, missing skills, matched keywords, and improvement suggestions
+- Resume-specific interview questions with interviewer-friendly sample answers
+- Interview Q&A PDF download
 - Local analysis history
 - Loading overlay while analysis is running
 

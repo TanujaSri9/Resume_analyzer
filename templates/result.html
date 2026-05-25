@@ -124,6 +124,36 @@
                             {% endfor %}
                         </ul>
                     </article>
+
+                    <article class="result-section wide-section interview-section">
+                        <div class="section-heading-row">
+                            <div>
+                                <h2>Interview Questions & Answers</h2>
+                                <p>High-probability questions based on this resume, target role, and job description.</p>
+                            </div>
+
+                            <form class="download-form" action="{{ url_for('download_interview_pdf') }}" method="POST">
+                                <input type="hidden" name="analysis_json" value="{{ analysis | tojson | forceescape }}">
+                                <input type="hidden" name="filename" value="{{ history_record.filename if history_record else 'resume' }}">
+                                <input type="hidden" name="target_role" value="{{ history_record.target_role if history_record else analysis.target_role }}">
+                                <button class="download-button" type="submit">Download PDF</button>
+                            </form>
+                        </div>
+
+                        <div class="interview-list">
+                            {% if analysis.interview_questions %}
+                                {% for item in analysis.interview_questions %}
+                                    <article class="qa-card">
+                                        <span>{{ item.focus_area }}</span>
+                                        <h3>{{ item.question }}</h3>
+                                        <p>{{ item.answer }}</p>
+                                    </article>
+                                {% endfor %}
+                            {% else %}
+                                <p>Interview questions are available for newly generated reports.</p>
+                            {% endif %}
+                        </div>
+                    </article>
                 </div>
 
                 <a class="back-link" href="/">Analyze Another Resume</a>

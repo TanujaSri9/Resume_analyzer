@@ -9,6 +9,7 @@ from uuid import uuid4
 import pdfplumber
 import os
 import json
+import textwrap
 
 try:
     from dotenv import load_dotenv
@@ -90,6 +91,111 @@ def get_history_record(record_id):
     return None
 
 
+def pdf_escape(text):
+    cleaned_text = str(text).replace("\r", " ").replace("\n", " ")
+    cleaned_text = cleaned_text.encode("latin-1", "replace").decode("latin-1")
+    return cleaned_text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+
+
+def add_pdf_page(pages, lines):
+    commands = []
+
+    for line in lines:
+        font = "F2" if line.get("bold") else "F1"
+        size = line.get("size", 10)
+        x = line.get("x", 50)
+        y = line.get("y", 750)
+        text = pdf_escape(line.get("text", ""))
+        commands.append(f"BT /{font} {size} Tf {x} {y} Td ({text}) Tj ET")
+
+    pages.append("\n".join(commands).encode("latin-1", "replace"))
+
+
+def build_interview_pdf(analysis, filename, target_role):
+    interview_questions = analysis.get("interview_questions", [])
+    pages = []
+    lines = []
+    y = 780
+
+    def write_line(text, size=10, bold=False, gap=15, x=50):
+        nonlocal lines, y
+
+        if y < 58:
+            add_pdf_page(pages, lines)
+            lines = []
+            y = 780
+
+        lines.append({"text": text, "size": size, "bold": bold, "x": x, "y": y})
+        y -= gap
+
+    write_line("AI Resume Analyzer - Interview Preparation", size=16, bold=True, gap=24)
+    write_line(f"Resume: {filename or 'Uploaded resume'}", size=10, gap=14)
+    write_line(f"Target role: {target_role or analysis.get('target_role', 'General')}", size=10, gap=20)
+    write_line("High-probability interview questions and interviewer-friendly answers.", size=10, gap=24)
+
+    if not interview_questions:
+        write_line("No interview questions were generated for this report.", size=11, bold=True)
+    else:
+        for index, item in enumerate(interview_questions, start=1):
+            focus_area = item.get("focus_area", "Interview")
+            question = item.get("question", "")
+            answer = item.get("answer", "")
+
+            write_line(f"{index}. {focus_area}", size=12, bold=True, gap=18)
+
+            for wrapped_line in textwrap.wrap(f"Question: {question}", width=92):
+                write_line(wrapped_line, size=10, bold=True, gap=13)
+
+            for wrapped_line in textwrap.wrap(f"Answer: {answer}", width=94):
+                write_line(wrapped_line, size=10, gap=13)
+
+            y -= 8
+
+    if lines:
+        add_pdf_page(pages, lines)
+
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids ["
+        + b" ".join(f"{3 + index * 2} 0 R".encode("ascii") for index in range(len(pages)))
+        + f"] /Count {len(pages)} >>".encode("ascii"),
+    ]
+
+    for index, content in enumerate(pages):
+        page_object_number = 3 + index * 2
+        content_object_number = page_object_number + 1
+        page = (
+            f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+            f"/Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> "
+            f"/F2 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >> >> >> "
+            f"/Contents {content_object_number} 0 R >>"
+        ).encode("ascii")
+        stream = b"<< /Length " + str(len(content)).encode("ascii") + b" >>\nstream\n" + content + b"\nendstream"
+        objects.extend([page, stream])
+
+    pdf = bytearray(b"%PDF-1.4\n")
+    offsets = [0]
+
+    for object_number, content in enumerate(objects, start=1):
+        offsets.append(len(pdf))
+        pdf.extend(f"{object_number} 0 obj\n".encode("ascii"))
+        pdf.extend(content)
+        pdf.extend(b"\nendobj\n")
+
+    xref_offset = len(pdf)
+    pdf.extend(f"xref\n0 {len(objects) + 1}\n".encode("ascii"))
+    pdf.extend(b"0000000000 65535 f \n")
+
+    for offset in offsets[1:]:
+        pdf.extend(f"{offset:010d} 00000 n \n".encode("ascii"))
+
+    pdf.extend(
+        f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref_offset}\n%%EOF".encode("ascii")
+    )
+
+    return bytes(pdf)
+
+
 def analyze_resume_with_gemini(resume_text, target_role, job_description):
     api_key = os.getenv("GEMINI_API_KEY")
 
@@ -115,6 +221,18 @@ def analyze_resume_with_gemini(resume_text, target_role, job_description):
             "matched_keywords": {"type": "array", "items": {"type": "string"}},
             "missing_job_keywords": {"type": "array", "items": {"type": "string"}},
             "role_based_recommendations": {"type": "array", "items": {"type": "string"}},
+            "interview_questions": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "focus_area": {"type": "string"},
+                        "question": {"type": "string"},
+                        "answer": {"type": "string"},
+                    },
+                    "required": ["focus_area", "question", "answer"],
+                },
+            },
             "improvement_suggestions": {"type": "array", "items": {"type": "string"}},
         },
         "required": [
@@ -130,6 +248,7 @@ def analyze_resume_with_gemini(resume_text, target_role, job_description):
             "matched_keywords",
             "missing_job_keywords",
             "role_based_recommendations",
+            "interview_questions",
             "improvement_suggestions",
         ],
     }
@@ -154,6 +273,12 @@ Also score:
 
 Return concise, practical feedback. Keep arrays to 3 to 6 items each.
 
+Generate 8 interview questions that have a high chance of being asked for this candidate.
+Base them on the resume, selected role, job description, projects, skills, gaps, and experience level.
+For each answer, write an interviewer-friendly sample answer in first person.
+The answer should sound confident, specific, and honest. Do not invent exact metrics or companies.
+If the resume lacks a detail, phrase the answer as a template the candidate can personalize.
+
 Return only JSON that matches this schema:
 - ats_score: integer from 0 to 100
 - job_match_score: integer from 0 to 100
@@ -167,6 +292,7 @@ Return only JSON that matches this schema:
 - matched_keywords: array of strings
 - missing_job_keywords: array of strings
 - role_based_recommendations: array of strings
+- interview_questions: array of objects with focus_area, question, and answer strings
 - improvement_suggestions: array of strings
 
 Target role:
@@ -316,6 +442,27 @@ def history_detail(record_id):
         "result.html",
         analysis=history_record["analysis"],
         history_record=history_record,
+    )
+
+
+@app.route("/download-interview-pdf", methods=["POST"])
+def download_interview_pdf():
+    try:
+        analysis = json.loads(request.form.get("analysis_json", "{}"))
+    except json.JSONDecodeError:
+        return render_template("result.html", error="Could not prepare the interview PDF."), 400
+
+    filename = request.form.get("filename", "resume")
+    target_role = request.form.get("target_role", analysis.get("target_role", "General"))
+    pdf = build_interview_pdf(analysis, filename, target_role)
+    download_name = f"{secure_filename(target_role or 'interview-prep') or 'interview-prep'}-questions.pdf"
+
+    return Response(
+        pdf,
+        mimetype="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{download_name}"',
+        },
     )
 
 

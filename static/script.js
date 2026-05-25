@@ -7,6 +7,7 @@ const loadingMessages = [
     "Reading resume details...",
     "Comparing skills with the selected role...",
     "Checking job description alignment...",
+    "Creating interview questions...",
     "Preparing your ATS report...",
 ];
 
