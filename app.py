@@ -1,11 +1,11 @@
 from flask import Flask, Response, render_template, request, url_for
-from google import genai
-from google.genai import errors as genai_errors
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 from pathlib import Path
 from datetime import datetime, timezone
 from uuid import uuid4
+from urllib import error as url_error
+from urllib import request as url_request
 import pdfplumber
 import os
 import json
@@ -24,7 +24,8 @@ UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"pdf"}
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+NVIDIA_MODEL = os.getenv("NVIDIA_MODEL", "nvidia/nemotron-3-nano-30b-a3b")
+NVIDIA_BASE_URL = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1").rstrip("/")
 SITE_URL = os.getenv("SITE_URL", "").rstrip("/")
 HISTORY_FILE = Path(__file__).with_name("data") / "history.json"
 TARGET_ROLES = [
@@ -89,6 +90,61 @@ def get_history_record(record_id):
             return record
 
     return None
+
+
+def extract_json_object(text):
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        start = text.find("{")
+        end = text.rfind("}")
+
+        if start == -1 or end == -1 or end <= start:
+            raise
+
+        return json.loads(text[start : end + 1])
+
+
+def create_nvidia_chat_completion(messages, max_tokens=4096):
+    api_key = os.getenv("NVIDIA_API_KEY")
+
+    if not api_key:
+        raise RuntimeError("NVIDIA_API_KEY is missing in .env file.")
+
+    payload = {
+        "model": NVIDIA_MODEL,
+        "messages": messages,
+        "temperature": 0.2,
+        "top_p": 0.7,
+        "max_tokens": max_tokens,
+        "stream": False,
+    }
+
+    data = json.dumps(payload).encode("utf-8")
+    request = url_request.Request(
+        f"{NVIDIA_BASE_URL}/chat/completions",
+        data=data,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        with url_request.urlopen(request, timeout=90) as response:
+            response_data = json.loads(response.read().decode("utf-8"))
+    except url_error.HTTPError as error:
+        error_body = error.read().decode("utf-8", "replace")
+        raise RuntimeError(f"NVIDIA API error ({error.code}): {error_body}") from error
+    except url_error.URLError as error:
+        raise RuntimeError(f"Could not connect to NVIDIA API: {error.reason}") from error
+
+    try:
+        return response_data["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError) as error:
+        raise RuntimeError("NVIDIA API returned an unexpected response format.") from error
 
 
 def pdf_escape(text):
@@ -196,16 +252,7 @@ def build_interview_pdf(analysis, filename, target_role):
     return bytes(pdf)
 
 
-def analyze_resume_with_gemini(resume_text, target_role, job_description):
-    api_key = os.getenv("GEMINI_API_KEY")
-
-    if not api_key:
-        raise RuntimeError(
-            "GEMINI_API_KEY is missing in .env file."
-        )
-
-    client = genai.Client(api_key=api_key)
-
+def analyze_resume_with_nvidia(resume_text, target_role, job_description):
     schema = {
         "type": "object",
         "properties": {
@@ -305,16 +352,26 @@ Resume:
 {resume_text[:15000]}
 """
 
-    response = client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=prompt,
-        config={
-            "response_mime_type": "application/json",
-            "response_json_schema": schema,
-        },
+    response_text = create_nvidia_chat_completion(
+        [
+            {
+                "role": "system",
+                "content": (
+                    "You are an expert ATS resume reviewer. Return only valid JSON. "
+                    "Do not include markdown fences, explanations, or text outside the JSON object."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"{prompt}\n\nJSON schema to follow exactly:\n"
+                    f"{json.dumps(schema, indent=2)}"
+                ),
+            },
+        ],
     )
 
-    return json.loads(response.text)
+    return extract_json_object(response_text)
 
 
 @app.route("/")
@@ -400,21 +457,16 @@ def analyze_resume():
         )
 
     try:
-        analysis = analyze_resume_with_gemini(extracted_text, target_role, job_description)
+        analysis = analyze_resume_with_nvidia(extracted_text, target_role, job_description)
     except RuntimeError as error:
         return render_template(
             "result.html",
             error=str(error),
         )
-    except genai_errors.APIError as error:
-        return render_template(
-            "result.html",
-            error=f"Gemini API error: {error.message}",
-        )
     except json.JSONDecodeError:
         return render_template(
             "result.html",
-            error="The AI response could not be parsed. Please try again.",
+            error="The NVIDIA AI response could not be parsed. Please try again.",
         )
 
     history_record = save_history_record(filename, target_role, job_description, analysis)

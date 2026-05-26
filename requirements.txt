@@ -1,4 +1,3 @@
 flask
-google-genai
 pdfplumber
 python-dotenv

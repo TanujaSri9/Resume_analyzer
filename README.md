@@ -1,6 +1,6 @@
 # AI Resume Analyzer
 
-A Flask web app that analyzes PDF resumes with Gemini and generates ATS-style feedback, job-description matching, role-fit scoring, interview preparation, and saved report history.
+A Flask web app that analyzes PDF resumes with NVIDIA Nemotron and generates ATS-style feedback, job-description matching, role-fit scoring, interview preparation, and saved report history.
 
 ## Features
 
@@ -22,11 +22,12 @@ A Flask web app that analyzes PDF resumes with Gemini and generates ATS-style fe
 pip install -r requirements.txt
 ```
 
-2. Create a `.env` file from `.env.example` and add your Gemini API key:
+2. Create a `.env` file from `.env.example` and add your NVIDIA API key:
 
 ```bash
-GEMINI_API_KEY=your_api_key_here
-GEMINI_MODEL=gemini-2.5-flash
+NVIDIA_API_KEY=your_api_key_here
+NVIDIA_MODEL=nvidia/nemotron-3-nano-30b-a3b
+NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
 ```
 
 3. Run the app:
