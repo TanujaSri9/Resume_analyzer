@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Mock Interview — AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="site-header-inner">
+        <a href="/" class="logo-link"><span class="logo-icon">✦</span><span class="logo-text">ResumeAI</span></a>
+        <nav class="site-nav">
+            <a href="/" class="nav-link">Analyze</a>
+            <a href="/mock-interview" class="nav-link nav-highlight">🎤 Mock Interview</a>
+            <a href="/history" class="nav-link">History</a>
+        </nav>
+    </div>
+</header>
+
+<main class="page-shell results-shell">
+    <section class="container results-card" aria-labelledby="interview-title">
+
+        <p class="eyebrow">AI-Powered Practice</p>
+        <h1 id="interview-title">Mock Interview Simulator</h1>
+        <p class="subtitle">Practice with an AI interviewer — get live feedback on each answer and a final performance score out of 10.</p>
+
+        <!-- ── Role selector ── -->
+        <div id="interview-setup" class="interview-setup">
+            <div class="setup-grid">
+                <div>
+                    <label class="field-label" for="mock-role">Target Role</label>
+                    <select id="mock-role">
+                        {% for role in target_roles %}
+                            <option value="{{ role }}">{{ role }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="field-label" for="mock-context">Brief Background <span style="font-weight:400;color:var(--tx3)">(optional)</span></label>
+                    <input type="text" id="mock-context" placeholder="e.g. Final-year CS student, 1 internship in React">
+                </div>
+            </div>
+            <div class="setup-info">
+                <span>🎯 5 questions</span>
+                <span>·</span>
+                <span>👔 HR + ⚙️ Technical</span>
+                <span>·</span>
+                <span>📊 Performance score at the end</span>
+            </div>
+            <button class="btn-primary" id="start-interview-btn" style="max-width:280px">🎤 Start Interview</button>
+        </div>
+
+        <!-- ── Chat window ── -->
+        <div id="interview-chat" class="interview-chat" hidden>
+            <div class="chat-header">
+                <div class="chat-header-left">
+                    <div class="ai-avatar">🤖</div>
+                    <div>
+                        <span class="chat-role-label" id="chat-role-label">AI Interviewer</span>
+                        <span class="chat-status" id="chat-status">Question 1 of 5</span>
+                    </div>
+                </div>
+                <button class="btn-restart" id="restart-btn">↺ Restart</button>
+            </div>
+
+            <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
+
+            <div class="chat-input-row" id="chat-input-row">
+                <textarea id="user-answer"
+                    placeholder="Type your answer here… (Shift+Enter for new line, Enter to submit)"
+                    rows="3"
+                    aria-label="Your answer"></textarea>
+                <button class="btn-send" id="send-btn" aria-label="Submit answer">➤</button>
+            </div>
+
+            <div class="chat-thinking" id="chat-thinking" hidden aria-live="polite">
+                <span class="thinking-dot"></span>
+                <span class="thinking-dot"></span>
+                <span class="thinking-dot"></span>
+                <span style="font-size:0.84rem;color:var(--tx3)">AI is evaluating your answer…</span>
+            </div>
+        </div>
+
+        <!-- ── Final summary ── -->
+        <div id="interview-summary" class="interview-summary" hidden>
+            <div class="summary-header">
+                <div class="summary-icon">🎉</div>
+                <h2>Interview Complete!</h2>
+                <p>Here's your performance review from the AI interviewer.</p>
+            </div>
+            <div class="summary-body" id="summary-body"></div>
+            <div class="summary-actions">
+                <button class="btn-primary" id="retry-btn" style="max-width:200px">↺ Try Again</button>
+                <a href="/" class="btn-back" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none">Analyze Resume →</a>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

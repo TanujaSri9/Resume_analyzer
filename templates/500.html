@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Server Error — AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<main class="page-shell results-shell">
+    <section class="container results-card" style="text-align:center;padding:80px 32px">
+        <div style="font-size:5rem;margin-bottom:16px">⚙️</div>
+        <p class="eyebrow">500 — Server Error</p>
+        <h1 style="font-size:2rem;font-weight:800;color:var(--tx1);margin:12px 0">Something Went Wrong</h1>
+        <p class="subtitle">An unexpected error occurred. Please try again in a moment.</p>
+        <a href="/" class="btn-back" style="display:inline-block;margin-top:24px">← Try Again</a>
+    </section>
+</main>
+</body>
+</html>

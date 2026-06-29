@@ -1,3 +1,6 @@
 flask
 pdfplumber
 python-dotenv
+flask-limiter
+python-docx
+waitress

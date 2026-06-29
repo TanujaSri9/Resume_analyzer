@@ -4,51 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>Resume Analysis History</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <title>Analysis History — AI Resume Analyzer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
     <main class="page-shell results-shell">
         <section class="container results-card" aria-labelledby="history-title">
+
             <nav class="top-nav" aria-label="Main navigation">
-                <a href="{{ url_for('home') }}">Analyze</a>
-                <a href="{{ url_for('history') }}">History</a>
+                <a href="{{ url_for('home') }}">⬅ Analyze</a>
+                <a href="{{ url_for('history') }}">📋 History</a>
             </nav>
 
-            <p class="eyebrow">Saved reports</p>
-            <h1 id="history-title">Resume History</h1>
-            <p class="subtitle">Review previous resume scans and compare how each resume performed for different roles.</p>
+            <p class="eyebrow">Saved Reports</p>
+            <h1 id="history-title">Analysis History</h1>
+            <p class="subtitle">Review all previous resume scans and compare how each one performed across different roles.</p>
 
             {% if history %}
                 <div class="history-list">
                     {% for record in history %}
+
+                        {# Determine score badge classes #}
+                        {% set ats_badge = 'badge-green' if record.analysis.ats_score >= 75 else ('badge-amber' if record.analysis.ats_score >= 50 else 'badge-rose') %}
+                        {% set match_badge = 'badge-green' if record.analysis.job_match_score >= 75 else ('badge-amber' if record.analysis.job_match_score >= 50 else 'badge-rose') %}
+                        {% set fit_badge = 'badge-green' if record.analysis.role_fit_score >= 75 else ('badge-amber' if record.analysis.role_fit_score >= 50 else 'badge-rose') %}
+
                         <article class="history-item">
-                            <div>
-                                <p class="history-title">{{ record.filename }}</p>
-                                <p class="history-meta">
-                                    {{ record.target_role }} ·
-                                    ATS {{ record.analysis.ats_score }}% ·
-                                    Match {{ record.analysis.job_match_score }}%
-                                </p>
+                            <div class="history-body">
+                                <p class="history-filename">📄 {{ record.filename }}</p>
+                                <div class="history-row">
+                                    <span class="history-role">🎯 {{ record.target_role }}</span>
+                                    <div class="score-badges">
+                                        <span class="score-badge {{ ats_badge }}">ATS {{ record.analysis.ats_score }}%</span>
+                                        <span class="score-badge {{ match_badge }}">Match {{ record.analysis.job_match_score }}%</span>
+                                        <span class="score-badge {{ fit_badge }}">Fit {{ record.analysis.role_fit_score }}%</span>
+                                    </div>
+                                </div>
+                                <time class="history-time"
+                                      datetime="{{ record.created_at }}"
+                                      data-ts="{{ record.created_at }}">{{ record.created_at }}</time>
                                 {% if record.job_description_preview %}
                                     <p class="history-preview">{{ record.job_description_preview }}</p>
                                 {% endif %}
                             </div>
-                            <a class="back-link compact-link" href="{{ url_for('history_detail', record_id=record.id) }}">Open Report</a>
+                            <div class="history-action">
+                                <a class="btn-open" href="{{ url_for('history_detail', record_id=record.id) }}">
+                                    Open Report →
+                                </a>
+                            </div>
                         </article>
+
                     {% endfor %}
                 </div>
+
             {% else %}
                 <div class="empty-state">
-                    <p>No reports saved yet.</p>
-                    <a class="back-link" href="{{ url_for('home') }}">Analyze a Resume</a>
+                    <div class="empty-icon">📭</div>
+                    <p>No reports saved yet. Analyze a resume to see results here.</p>
+                    <a class="btn-back" href="{{ url_for('home') }}">Analyze a Resume</a>
                 </div>
             {% endif %}
 
         </section>
     </main>
 
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

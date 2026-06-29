@@ -3,67 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Analyze PDF resumes with AI, compare them against job descriptions, and get ATS score, role fit, keyword gaps, and improvement suggestions.">
-    <meta name="robots" content="index, follow">
-    <meta name="google-site-verification" content="R5f3N8HObuBy7v2kUoXJGtD_QV62rou8rjZI8Cuhk04">
-    <meta property="og:title" content="AI Resume Analyzer">
-    <meta property="og:description" content="AI-powered resume analyzer with ATS scoring, job description matching, and role-based feedback.">
+    <meta name="description" content="Free AI resume analyzer for students. Get ATS score, job match, skill roadmap, interview prep, cover letter & mock interview in 30 seconds. No signup required.">
+    <meta property="og:title" content="AI Resume Analyzer — Free for Students">
+    <meta property="og:description" content="ATS score, interview prep, skill roadmap, cover letter & mock interview. Free. No signup. 30 seconds.">
     <meta property="og:type" content="website">
-    <title>AI Resume Analyzer</title>
-
+    <meta name="keywords" content="free resume analyzer, AI resume checker, ATS score, student resume, fresher resume, interview prep, cover letter generator">
+    <link rel="canonical" href="{{ request.url_root }}">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>AI Resume Analyzer — Free ATS Score, Interview Prep & Cover Letter</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="landing-body">
 
-    <main class="page-shell">
-        <section class="container" aria-labelledby="page-title">
-            <nav class="top-nav" aria-label="Main navigation">
-                <a href="{{ url_for('history') }}">History</a>
+    <!-- ══════════════ NAV ══════════════ -->
+    <header class="site-header">
+        <div class="site-header-inner">
+            <a href="/" class="logo-link">
+                <span class="logo-icon">✦</span>
+                <span class="logo-text">ResumeAI</span>
+            </a>
+            <nav class="site-nav">
+                <a href="#analyze" class="nav-link">Analyze</a>
+                <a href="/mock-interview" class="nav-link nav-highlight">🎤 Mock Interview</a>
+                <a href="/history" class="nav-link">History</a>
             </nav>
+        </div>
+    </header>
 
-            <p class="eyebrow">Role-aware screening</p>
-            <h1 id="page-title">AI Resume Analyzer</h1>
-            <p class="subtitle">Upload a PDF resume, choose a target role, and compare it with a job description.</p>
+    <!-- ══════════════ HERO ══════════════ -->
+    <section class="hero" aria-label="Hero">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="hero-inner">
+            <div class="hero-badge">✦ Free for Students &amp; Freshers</div>
+            <h1 class="hero-headline">
+                Score Your Resume.<br>
+                <span class="hero-gradient">Land the Interview.</span>
+            </h1>
+            <p class="hero-sub">
+                ATS score · Job match · Interview prep · Skill roadmap · Cover letter · Mock interview<br>
+                All in one place. No signup. Results in ~30 seconds.
+            </p>
+            <div class="hero-actions">
+                <a href="#analyze" class="btn-hero-primary">Analyze My Resume →</a>
+                <a href="/mock-interview" class="btn-hero-secondary">Try Mock Interview</a>
+            </div>
+            <div class="trust-row">
+                <span class="trust-item">🔒 Resume deleted instantly</span>
+                <span class="trust-sep">·</span>
+                <span class="trust-item">🚫 No signup needed</span>
+                <span class="trust-sep">·</span>
+                <span class="trust-item">⚡ ~30 seconds</span>
+                <span class="trust-sep">·</span>
+                <span class="trust-item">✨ 100% free</span>
+            </div>
+        </div>
+    </section>
 
-            <form id="analyze-form" action="/analyze" method="POST" enctype="multipart/form-data">
+    <!-- ══════════════ WHAT YOU GET ══════════════ -->
+    <section class="features-section" aria-labelledby="features-title">
+        <div class="section-inner">
+            <p class="section-eyebrow">Everything you need</p>
+            <h2 id="features-title" class="section-title">What you'll get in your report</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>ATS Score</h3>
+                    <p>See exactly how ATS bots rate your resume on keywords, formatting, and readability.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Job Match</h3>
+                    <p>Paste a job description and get a precise alignment score with matched &amp; missing keywords.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎤</div>
+                    <h3>Interview Prep</h3>
+                    <p>HR round and technical round questions tailored to your resume and target role — with sample answers.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🗺️</div>
+                    <h3>Skill Roadmap</h3>
+                    <p>Prioritised learning plan with timeline and free resource for each skill gap.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>Cover Letter</h3>
+                    <p>One-click professional cover letter personalised to your resume and the target role.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✏️</div>
+                    <h3>Project Enhancer</h3>
+                    <p>AI rewrites your weak project descriptions into strong, quantified bullet points.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏅</div>
+                    <h3>Certifications</h3>
+                    <p>Real certification recommendations mapped to your skill gaps — free and paid options.</p>
+                </div>
+                <div class="feature-card feature-card-highlight">
+                    <div class="feature-icon">🤖</div>
+                    <h3>Mock Interview</h3>
+                    <p>Practice with an AI interviewer that asks questions, evaluates your answers live, and gives a performance score.</p>
+                    <a href="/mock-interview" class="feature-cta">Try it free →</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                <label class="field-label" for="target-role">Target role</label>
-                <select id="target-role" name="target_role">
-                    {% for role in target_roles %}
-                        <option value="{{ role }}">{{ role }}</option>
-                    {% endfor %}
-                </select>
+    <!-- ══════════════ HOW IT WORKS ══════════════ -->
+    <section class="how-section" aria-labelledby="how-title">
+        <div class="section-inner">
+            <p class="section-eyebrow">Simple as 1-2-3</p>
+            <h2 id="how-title" class="section-title">How it works</h2>
+            <div class="steps-row">
+                <div class="step-item">
+                    <div class="step-num">1</div>
+                    <div class="step-body">
+                        <h3>Upload your resume</h3>
+                        <p>PDF or Word file · max 8 MB · deleted immediately after analysis</p>
+                    </div>
+                </div>
+                <div class="step-arrow" aria-hidden="true">→</div>
+                <div class="step-item">
+                    <div class="step-num">2</div>
+                    <div class="step-body">
+                        <h3>Choose role &amp; paste JD</h3>
+                        <p>Select your target role. Optionally paste the full job description for a precise match.</p>
+                    </div>
+                </div>
+                <div class="step-arrow" aria-hidden="true">→</div>
+                <div class="step-item">
+                    <div class="step-num">3</div>
+                    <div class="step-body">
+                        <h3>Get your full report</h3>
+                        <p>ATS score, interview questions, skill roadmap, cover letter — all ready in ~30 seconds.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                <label class="field-label" for="job-description">Job description</label>
-                <textarea
-                    id="job-description"
-                    name="job_description"
-                    rows="7"
-                    placeholder="Paste the job description here for a stronger match report."
-                ></textarea>
+    <!-- ══════════════ MOCK INTERVIEW BANNER ══════════════ -->
+    <section class="mock-banner" aria-label="Mock interview promotion">
+        <div class="section-inner">
+            <div class="mock-banner-card">
+                <div class="mock-banner-left">
+                    <span class="mock-banner-tag">🆕 Exclusive Feature</span>
+                    <h2>Practice With an AI Interviewer</h2>
+                    <p>Select a role → answer 5 questions → get a performance score with detailed feedback. No other free tool does this.</p>
+                    <a href="/mock-interview" class="btn-hero-primary" style="width:fit-content">Start Mock Interview →</a>
+                </div>
+                <div class="mock-banner-right" aria-hidden="true">
+                    <div class="mock-preview">
+                        <div class="mock-bubble ai-bubble">Tell me about yourself and why you chose Software Development.</div>
+                        <div class="mock-bubble user-bubble">I'm a final-year CS student passionate about building scalable web apps…</div>
+                        <div class="mock-bubble ai-bubble">Great opening! Add a specific project next time. Here's Q2: What is your approach to debugging a production issue?</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                <label class="upload-box">
-                    <span class="upload-icon">PDF</span>
-                    <span class="upload-title">Choose resume file</span>
-                    <span class="upload-hint">PDF files only</span>
-                    <input type="file" name="resume" accept=".pdf" required>
-                </label>
+    <!-- ══════════════ ANALYZE FORM ══════════════ -->
+    <section class="form-section" id="analyze" aria-labelledby="form-title">
+        <div class="section-inner form-inner">
+            <p class="section-eyebrow">Start now — free, no account needed</p>
+            <h2 id="form-title" class="section-title">Analyze Your Resume</h2>
 
-                <button id="analyze-button" type="submit">Analyze Resume</button>
+            <div class="container form-card" style="max-width:680px;margin:0 auto">
 
-            </form>
+                <form id="analyze-form" action="/analyze" method="POST" enctype="multipart/form-data" novalidate>
 
-        </section>
-    </main>
+                    <div>
+                        <label class="field-label" for="target-role">Target Role</label>
+                        <select id="target-role" name="target_role" required>
+                            {% for role in target_roles %}
+                                <option value="{{ role }}">{{ role }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
+                    <div>
+                        <label class="field-label" for="job-description">
+                            Job Description <span style="color:var(--tx3);font-weight:400">(optional — improves match accuracy)</span>
+                        </label>
+                        <textarea id="job-description" name="job_description" rows="5"
+                            placeholder="Paste the full job description here for a stronger match report…"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="field-label">Resume File</label>
+                        <label class="upload-box" id="upload-box">
+                            <div class="upload-icon-badge">📄</div>
+                            <span class="upload-title">Drop or click to choose your resume</span>
+                            <span class="upload-hint">{{ 'PDF or Word (.docx)' if docx_supported else 'PDF only' }} · Max 8 MB</span>
+                            <span class="upload-filename" id="filename-display" hidden></span>
+                            <input type="file" name="resume" id="resume-input"
+                                   accept="{{ '.pdf,.docx,.doc' if docx_supported else '.pdf' }}" required>
+                        </label>
+                    </div>
+
+                    <label class="toggle-row" for="is-fresher">
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="is-fresher" name="is_fresher" value="true">
+                            <span class="toggle-knob"></span>
+                        </div>
+                        <div class="toggle-info">
+                            <span class="toggle-label">🎓 Student / Fresher Mode</span>
+                            <span class="toggle-desc">Projects &amp; certifications weighted more heavily. Perfect for students and recent graduates.</span>
+                        </div>
+                    </label>
+
+                    <div class="time-note">⏱ Analysis takes ~20-40 seconds. Grab a coffee ☕</div>
+
+                    <button class="btn-primary" id="analyze-btn" type="submit">✦ Analyze Resume — Free</button>
+
+                </form>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════ FAQ ══════════════ -->
+    <section class="faq-section" aria-labelledby="faq-title">
+        <div class="section-inner faq-inner">
+            <p class="section-eyebrow">Got questions?</p>
+            <h2 id="faq-title" class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-list" id="faq-list">
+
+                <details class="faq-item">
+                    <summary>Is my resume safe? Will it be stored?</summary>
+                    <p>Your resume is <strong>deleted immediately</strong> after we extract text for analysis. We never store the actual file. The analysis results are saved privately in your browser session only.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>What is an ATS score and why does it matter?</summary>
+                    <p>ATS stands for Applicant Tracking System — the software most companies use to filter resumes before a human ever sees them. An ATS score indicates how well your resume passes this automated filter. A score below 60% means your resume is likely being rejected automatically.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>What file formats are supported?</summary>
+                    <p>We support <strong>PDF</strong>{% if docx_supported %} and <strong>Word (.docx)</strong>{% endif %} files up to 8 MB. Please ensure your resume contains actual text (not just a scanned image). A text-based PDF works best.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>Is this completely free?</summary>
+                    <p>Yes — <strong>100% free</strong>. No credit card, no subscription, no signup. Just upload and analyze.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>How accurate is the ATS score?</summary>
+                    <p>The score is generated by AI and is designed to give you a directionally accurate estimate of your resume's ATS performance. It's excellent for identifying weak areas and gaps. While no tool can perfectly replicate every ATS system, consistently scoring above 75% significantly improves your chances.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>What is the Mock Interview feature?</summary>
+                    <p>Mock Interview is an AI-powered chat simulator where an AI interviewer asks you 5 role-specific questions (mix of HR and technical), evaluates your answers in real time, gives constructive feedback after each answer, and provides a final performance summary with a score out of 10.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>Can I analyze multiple resumes?</summary>
+                    <p>Yes! You can analyze as many resumes as you like (up to 5 per hour to prevent abuse). All your reports are saved in your private history so you can compare different versions.</p>
+                </details>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════ FOOTER ══════════════ -->
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div class="footer-brand">
+                <span class="logo-icon">✦</span>
+                <span class="logo-text">ResumeAI</span>
+            </div>
+            <p class="footer-tagline">Free AI resume analysis for students and freshers.</p>
+            <p class="footer-note">Your resume is never stored. Analysis powered by NVIDIA AI.</p>
+        </div>
+    </footer>
+
+    <!-- ══════════════ LOADING OVERLAY ══════════════ -->
     <div class="loading-overlay" id="loading-overlay" aria-hidden="true">
         <div class="loading-panel" role="status" aria-live="polite">
             <div class="loader-ring" aria-hidden="true"></div>
             <p class="loading-title">Analyzing your resume</p>
-            <p class="loading-message" id="loading-message">Reading resume details...</p>
-            <div class="progress-track" aria-hidden="true">
-                <span></span>
-            </div>
+            <p class="loading-message" id="loading-msg">Reading resume content…</p>
+            <div class="progress-track" aria-hidden="true"><span></span></div>
         </div>
     </div>
 

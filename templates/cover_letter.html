@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Cover Letter — AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<main class="page-shell results-shell">
+    <section class="container results-card" aria-labelledby="cover-title">
+
+        <nav class="top-nav" aria-label="Main navigation">
+            {% if record %}
+                <a href="{{ url_for('history_detail', record_id=record.id) }}">⬅ Back to Report</a>
+            {% else %}
+                <a href="{{ url_for('home') }}">⬅ Analyze</a>
+            {% endif %}
+            <a href="{{ url_for('history') }}">📋 History</a>
+        </nav>
+
+        {% if error %}
+            <div class="error-state">
+                <div class="error-icon">⚠️</div>
+                <p class="eyebrow">Generation failed</p>
+                <h1 id="cover-title">Could not generate cover letter</h1>
+                <p class="subtitle">{{ error }}</p>
+                {% if record %}
+                    <a class="btn-back" href="{{ url_for('history_detail', record_id=record.id) }}">Back to Report</a>
+                {% else %}
+                    <a class="btn-back" href="/">Analyze a Resume</a>
+                {% endif %}
+            </div>
+
+        {% else %}
+
+            <p class="eyebrow">AI-Generated</p>
+            <h1 id="cover-title">Your Cover Letter</h1>
+            {% if record %}
+                <p class="subtitle">Generated for <strong>{{ record.target_role }}</strong> based on your resume and analysis.</p>
+                <div class="report-meta">
+                    <span class="meta-badge">📄 {{ record.filename }}</span>
+                    <span class="meta-badge">🎯 {{ record.target_role }}</span>
+                </div>
+            {% else %}
+                <p class="subtitle">Generated from your resume analysis.</p>
+            {% endif %}
+
+            <div class="letter-card">
+                <p class="letter-text" id="letter-body">{{ letter }}</p>
+                <div class="letter-actions">
+                    <button class="btn-copy" id="copy-btn" type="button">📋 Copy to Clipboard</button>
+                    {% if record %}
+                        <a class="btn-back" href="{{ url_for('history_detail', record_id=record.id) }}" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
+                            Back to Report
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="letter-tip">
+                <strong>💡 Tip:</strong> This is a starting point — customize it before sending. Add the company name, a specific detail from their job posting, and any personal connection you have to the role. Personalized letters get 3× more responses.
+            </div>
+
+            {% if record %}
+                <div style="margin-top:12px">
+                    <a href="{{ url_for('cover_letter', record_id=record.id) }}"
+                       style="font-size:0.84rem;color:var(--tx2);text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+                       🔄 Regenerate
+                    </a>
+                </div>
+            {% endif %}
+
+        {% endif %}
+
+    </section>
+</main>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

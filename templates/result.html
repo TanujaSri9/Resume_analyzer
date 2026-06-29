@@ -4,146 +4,512 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>Resume Analysis Results</title>
-
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Resume Analysis Report — AI Resume Analyzer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-    <main class="page-shell results-shell">
-        <section class="container results-card" aria-labelledby="results-title">
-            <nav class="top-nav" aria-label="Main navigation">
-                <a href="{{ url_for('home') }}">Analyze</a>
-                <a href="{{ url_for('history') }}">History</a>
-            </nav>
+<main class="page-shell results-shell">
+    <section class="container results-card" aria-labelledby="results-title">
 
-            {% if error %}
+        <nav class="top-nav" aria-label="Main navigation">
+            <a href="{{ url_for('home') }}">⬅ Analyze</a>
+            <a href="/mock-interview">🎤 Mock Interview</a>
+            <a href="{{ url_for('history') }}">📋 History</a>
+        </nav>
+
+        {% if error %}
+            <div class="error-state">
+                <div class="error-icon">⚠️</div>
                 <p class="eyebrow">Analysis failed</p>
                 <h1 id="results-title">Something went wrong</h1>
                 <p class="subtitle">{{ error }}</p>
-                <a class="back-link" href="/">Try Another Resume</a>
+                <a class="btn-back" href="/">Try Another Resume</a>
+            </div>
+
+        {% else %}
+
+        {# ── Score class helpers ─────────────────────────────────── #}
+        {% set ats_cls = 'score-high' if analysis.ats_score >= 75 else ('score-mid' if analysis.ats_score >= 50 else 'score-low') %}
+        {% set job_cls = 'score-high' if analysis.job_match_score >= 75 else ('score-mid' if analysis.job_match_score >= 50 else 'score-low') %}
+        {% set fit_cls = 'score-high' if analysis.role_fit_score >= 75 else ('score-mid' if analysis.role_fit_score >= 50 else 'score-low') %}
+
+        {# ── Page header ─────────────────────────────────────────── #}
+        <p class="eyebrow">ATS Analysis Complete</p>
+        <h1 id="results-title">Resume Report</h1>
+        <p class="subtitle">{{ analysis.summary }}</p>
+
+        {# ── Meta badges ─────────────────────────────────────────── #}
+        {% if history_record %}
+        <div class="report-meta">
+            <span class="meta-badge">📄 {{ history_record.filename }}</span>
+            <span class="meta-badge">🎯 {{ history_record.target_role }}</span>
+            {% if history_record.is_fresher %}
+                <span class="meta-badge fresher-badge">🎓 Fresher Mode</span>
+            {% endif %}
+            {% if history_record.has_job_description %}
+                <span class="meta-badge">✅ Job description matched</span>
             {% else %}
-                <p class="eyebrow">ATS analysis</p>
-                <h1 id="results-title">Resume Report</h1>
-                <p class="subtitle">{{ analysis.summary }}</p>
+                <span class="meta-badge">📌 Role-only match</span>
+            {% endif %}
+        </div>
+        {% endif %}
 
-                {% if history_record %}
-                    <div class="report-meta">
-                        <span>{{ history_record.filename }}</span>
-                        <span>{{ history_record.target_role }}</span>
-                        {% if history_record.has_job_description %}
-                            <span>Job description matched</span>
-                        {% else %}
-                            <span>Role-only match</span>
-                        {% endif %}
-                    </div>
-                {% endif %}
+        {# ── Score rings ─────────────────────────────────────────── #}
+        <div class="score-grid" aria-label="Score summary">
 
-                <div class="score-grid">
-                    <div class="score-panel">
-                        <span class="score-label">ATS Score</span>
-                        <strong class="score-value">{{ analysis.ats_score }}%</strong>
-                    </div>
-
-                    <div class="score-panel">
-                        <span class="score-label">Job Match</span>
-                        <strong class="score-value">{{ analysis.job_match_score }}%</strong>
-                    </div>
-
-                    <div class="score-panel">
-                        <span class="score-label">Role Fit</span>
-                        <strong class="score-value">{{ analysis.role_fit_score }}%</strong>
-                    </div>
+            <div class="score-panel {{ ats_cls }}">
+                <div class="ring-wrap" aria-hidden="true">
+                    <svg class="score-ring" viewBox="0 0 112 112">
+                        <circle class="ring-bg" cx="56" cy="56" r="48"/>
+                        <circle class="ring-fg" cx="56" cy="56" r="48"
+                            data-offset="{{ (301.59 * (1 - analysis.ats_score / 100)) | round(2) }}"/>
+                    </svg>
+                    <span class="ring-label">{{ analysis.ats_score }}%</span>
                 </div>
+                <div class="score-info">
+                    <span class="score-name">ATS Score</span>
+                    <span class="score-desc">Keyword &amp; format readability</span>
+                    <span class="score-tag {{ 'tag-high' if analysis.ats_score >= 75 else ('tag-mid' if analysis.ats_score >= 50 else 'tag-low') }}">
+                        {{ '✦ Strong' if analysis.ats_score >= 75 else ('◆ Moderate' if analysis.ats_score >= 50 else '▲ Needs Work') }}
+                    </span>
+                </div>
+            </div>
 
+            <div class="score-panel {{ job_cls }}">
+                <div class="ring-wrap" aria-hidden="true">
+                    <svg class="score-ring" viewBox="0 0 112 112">
+                        <circle class="ring-bg" cx="56" cy="56" r="48"/>
+                        <circle class="ring-fg" cx="56" cy="56" r="48"
+                            data-offset="{{ (301.59 * (1 - analysis.job_match_score / 100)) | round(2) }}"/>
+                    </svg>
+                    <span class="ring-label">{{ analysis.job_match_score }}%</span>
+                </div>
+                <div class="score-info">
+                    <span class="score-name">Job Match</span>
+                    <span class="score-desc">Alignment with job description</span>
+                    <span class="score-tag {{ 'tag-high' if analysis.job_match_score >= 75 else ('tag-mid' if analysis.job_match_score >= 50 else 'tag-low') }}">
+                        {{ '✦ Strong' if analysis.job_match_score >= 75 else ('◆ Moderate' if analysis.job_match_score >= 50 else '▲ Needs Work') }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="score-panel {{ fit_cls }}">
+                <div class="ring-wrap" aria-hidden="true">
+                    <svg class="score-ring" viewBox="0 0 112 112">
+                        <circle class="ring-bg" cx="56" cy="56" r="48"/>
+                        <circle class="ring-fg" cx="56" cy="56" r="48"
+                            data-offset="{{ (301.59 * (1 - analysis.role_fit_score / 100)) | round(2) }}"/>
+                    </svg>
+                    <span class="ring-label">{{ analysis.role_fit_score }}%</span>
+                </div>
+                <div class="score-info">
+                    <span class="score-name">Role Fit</span>
+                    <span class="score-desc">Suitability for target role</span>
+                    <span class="score-tag {{ 'tag-high' if analysis.role_fit_score >= 75 else ('tag-mid' if analysis.role_fit_score >= 50 else 'tag-low') }}">
+                        {{ '✦ Strong' if analysis.role_fit_score >= 75 else ('◆ Moderate' if analysis.role_fit_score >= 50 else '▲ Needs Work') }}
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+        {# ════════════════════════════════════════════════════════
+           TABS
+           ════════════════════════════════════════════════════════ #}
+        <div class="result-tabs">
+            <nav class="tab-nav" role="tablist" aria-label="Result sections">
+                <button role="tab" class="tab-btn active" data-tab="overview"  aria-selected="true">📊 Overview</button>
+                <button role="tab" class="tab-btn"        data-tab="action"    aria-selected="false">🎯 Action Plan</button>
+                <button role="tab" class="tab-btn"        data-tab="interview" aria-selected="false">🎤 Interview Prep</button>
+                <button role="tab" class="tab-btn"        data-tab="cover"     aria-selected="false">📝 Cover Letter</button>
+            </nav>
+
+            {# ══════════ TAB 1 — OVERVIEW ══════════ #}
+            <div class="tab-panel" id="tab-overview" role="tabpanel">
                 <div class="analysis-grid">
-                    <article class="result-section wide-section">
-                        <h2>Job Description Alignment</h2>
+
+                    <article class="result-section wide-section section-sky">
+                        <h2 class="section-heading"><span class="section-icon">📊</span> Job Description Alignment</h2>
                         <p>{{ analysis.job_description_alignment }}</p>
                     </article>
 
-                    <article class="result-section">
-                        <h2>Strengths</h2>
-                        <ul>
-                            {% for item in analysis.strengths %}
-                                <li>{{ item }}</li>
-                            {% endfor %}
-                        </ul>
+                    <article class="result-section section-green">
+                        <h2 class="section-heading"><span class="section-icon">✅</span> Strengths</h2>
+                        {% if analysis.strengths %}
+                            <ul class="item-list list-green">
+                                {% for item in analysis.strengths %}<li>{{ item }}</li>{% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="section-empty">None identified.</p>
+                        {% endif %}
                     </article>
 
-                    <article class="result-section">
-                        <h2>Weaknesses</h2>
-                        <ul>
-                            {% for item in analysis.weaknesses %}
-                                <li>{{ item }}</li>
-                            {% endfor %}
-                        </ul>
+                    <article class="result-section section-rose">
+                        <h2 class="section-heading"><span class="section-icon">⚡</span> Weaknesses</h2>
+                        {% if analysis.weaknesses %}
+                            <ul class="item-list list-rose">
+                                {% for item in analysis.weaknesses %}<li>{{ item }}</li>{% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="section-empty">None identified.</p>
+                        {% endif %}
                     </article>
 
-                    <article class="result-section">
-                        <h2>Missing Skills</h2>
-                        <ul>
-                            {% for item in analysis.missing_skills %}
-                                <li>{{ item }}</li>
-                            {% endfor %}
-                        </ul>
+                    <article class="result-section section-amber">
+                        <h2 class="section-heading"><span class="section-icon">🔍</span> Missing Skills</h2>
+                        {% if analysis.missing_skills %}
+                            <ul class="item-list list-amber">
+                                {% for item in analysis.missing_skills %}<li>{{ item }}</li>{% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="section-empty">No critical skill gaps found.</p>
+                        {% endif %}
                     </article>
 
-                    <article class="result-section">
-                        <h2>Improvement Suggestions</h2>
-                        <ul>
-                            {% for item in analysis.improvement_suggestions %}
-                                <li>{{ item }}</li>
-                            {% endfor %}
-                        </ul>
+                    <article class="result-section section-blue">
+                        <h2 class="section-heading"><span class="section-icon">💡</span> Improvement Suggestions</h2>
+                        {% if analysis.improvement_suggestions %}
+                            <ul class="item-list list-blue">
+                                {% for item in analysis.improvement_suggestions %}<li>{{ item }}</li>{% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="section-empty">No suggestions at this time.</p>
+                        {% endif %}
                     </article>
 
-                    <article class="result-section">
-                        <h2>Matched Keywords</h2>
-                        <ul>
-                            {% for item in analysis.matched_keywords %}
-                                <li>{{ item }}</li>
-                            {% endfor %}
-                        </ul>
-                    </article>
-
-                    <article class="result-section">
-                        <h2>Missing Job Keywords</h2>
-                        <ul>
-                            {% for item in analysis.missing_job_keywords %}
-                                <li>{{ item }}</li>
-                            {% endfor %}
-                        </ul>
-                    </article>
-
-                    <article class="result-section">
-                        <h2>Role-Based Recommendations</h2>
-                        <ul>
-                            {% for item in analysis.role_based_recommendations %}
-                                <li>{{ item }}</li>
-                            {% endfor %}
-                        </ul>
-                    </article>
-
-                    <article class="result-section wide-section interview-section">
-                        <div class="interview-download-card">
-                            <div>
-                                <h2>Interview Questions For Your Resume</h2>
-                                <p>Download a PDF with likely interview questions and interviewer-friendly answers based on this resume.</p>
+                    <article class="result-section section-green">
+                        <h2 class="section-heading"><span class="section-icon">🎯</span> Matched Keywords</h2>
+                        {% if analysis.matched_keywords %}
+                            <div class="chip-list">
+                                {% for item in analysis.matched_keywords %}
+                                    <span class="chip chip-green">{{ item }}</span>
+                                {% endfor %}
                             </div>
+                        {% else %}
+                            <p class="section-empty">No matched keywords found.</p>
+                        {% endif %}
+                    </article>
 
-                            {% if history_record %}
-                                <a class="download-button" href="{{ url_for('download_interview_pdf', record_id=history_record.id) }}">Download Interview PDF</a>
+                    <article class="result-section section-rose">
+                        <h2 class="section-heading"><span class="section-icon">🔑</span> Missing Keywords</h2>
+                        {% if analysis.missing_job_keywords %}
+                            <div class="chip-list">
+                                {% for item in analysis.missing_job_keywords %}
+                                    <span class="chip chip-rose">{{ item }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="section-empty">No missing keywords detected.</p>
+                        {% endif %}
+                    </article>
+
+                    <article class="result-section wide-section section-indigo">
+                        <h2 class="section-heading"><span class="section-icon">🗺️</span> Role-Based Recommendations</h2>
+                        {% if analysis.role_based_recommendations %}
+                            <ul class="item-list list-indigo">
+                                {% for item in analysis.role_based_recommendations %}<li>{{ item }}</li>{% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="section-empty">No recommendations at this time.</p>
+                        {% endif %}
+                    </article>
+
+                </div>
+            </div>
+
+            {# ══════════ TAB 2 — ACTION PLAN ══════════ #}
+            <div class="tab-panel" id="tab-action" role="tabpanel" hidden>
+
+                {# Project Enhancement Tips #}
+                <article class="result-section wide-section" style="margin-bottom:16px">
+                    <h2 class="section-heading"><span class="section-icon">✏️</span> Project Enhancement Tips</h2>
+                    <p style="font-size:0.87rem;color:var(--tx2);margin-bottom:16px;line-height:1.5">
+                        Weak project descriptions are one of the biggest reasons resumes get rejected. Here's how to make yours stand out.
+                    </p>
+                    {% if analysis.project_tips %}
+                        <div class="project-tips-list">
+                            {% for tip in analysis.project_tips %}
+                                <div class="tip-card">
+                                    <div class="tip-row">
+                                        <div class="tip-side">
+                                            <span class="tip-badge tip-badge-warn">⚠ Original</span>
+                                            <p class="tip-text tip-text-warn">{{ tip.original }}</p>
+                                        </div>
+                                        <div class="tip-arrow" aria-hidden="true">→</div>
+                                        <div class="tip-side">
+                                            <span class="tip-badge tip-badge-ok">✓ Enhanced</span>
+                                            <p class="tip-text tip-text-ok">{{ tip.improved }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="tip-why">
+                                        <span>💡</span>
+                                        <span>{{ tip.why }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="section-empty">No project descriptions found to enhance, or all descriptions are already strong.</p>
+                    {% endif %}
+                </article>
+
+                {# Quantification Coach #}
+                <article class="result-section wide-section" style="margin-bottom:16px">
+                    <h2 class="section-heading"><span class="section-icon">📊</span> Quantification Coach</h2>
+                    <p style="font-size:0.87rem;color:var(--tx2);margin-bottom:16px;line-height:1.5">
+                        Resume bullets with numbers perform 40% better on ATS systems. Here's where to add metrics.
+                    </p>
+                    {% if analysis.quantification_tips %}
+                        <div class="quant-list">
+                            {% for tip in analysis.quantification_tips %}
+                                <div class="quant-card">
+                                    <p class="quant-original">{{ tip.original }}</p>
+                                    <p class="quant-suggested">{{ tip.suggested }}</p>
+                                    <p class="quant-hint">📏 {{ tip.metric_hint }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="section-empty">Your resume already uses metrics effectively, or no clear opportunities were found.</p>
+                    {% endif %}
+                </article>
+
+                {# Skill Roadmap #}
+                <article class="result-section wide-section" style="margin-bottom:16px">
+                    <h2 class="section-heading"><span class="section-icon">🗺️</span> Skill Gap Roadmap</h2>
+                    <p style="font-size:0.87rem;color:var(--tx2);margin-bottom:16px;line-height:1.5">
+                        A prioritised learning plan to make you job-ready. Start with High priority skills first.
+                    </p>
+                    {% if analysis.skill_roadmap %}
+                        <div class="roadmap-grid">
+                            {% for item in analysis.skill_roadmap %}
+                                {% set p = item.priority | lower %}
+                                <div class="roadmap-item">
+                                    <span class="roadmap-priority priority-{{ p }}">{{ item.priority }}</span>
+                                    <div class="roadmap-body">
+                                        <p class="roadmap-skill">{{ item.skill }}</p>
+                                        <p class="roadmap-resource">📚 {{ item.resource }}</p>
+                                    </div>
+                                    <div class="roadmap-weeks">
+                                        <span class="roadmap-weeks-num">{{ item.weeks }}</span>
+                                        <span class="roadmap-weeks-label">week{{ 's' if item.weeks != 1 }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="section-empty">No critical skill gaps detected for this role.</p>
+                    {% endif %}
+                </article>
+
+                {# Certification Recommendations #}
+                <article class="result-section wide-section">
+                    <h2 class="section-heading"><span class="section-icon">🏅</span> Recommended Certifications</h2>
+                    <p style="font-size:0.87rem;color:var(--tx2);margin-bottom:16px;line-height:1.5">
+                        These certifications would directly strengthen your resume for this role and fill key skill gaps.
+                    </p>
+                    {% if analysis.certifications %}
+                        <div class="cert-grid">
+                            {% for cert in analysis.certifications %}
+                                <div class="cert-card">
+                                    <div class="cert-card-top">
+                                        <span class="cert-name">{{ cert.name }}</span>
+                                        <span class="cert-free-badge {{ 'cert-free-yes' if cert.is_free else 'cert-free-paid' }}">
+                                            {{ 'Free' if cert.is_free else 'Paid' }}
+                                        </span>
+                                    </div>
+                                    <span class="cert-provider">{{ cert.provider }}</span>
+                                    <span class="cert-detail">🎯 Covers: {{ cert.skill }}</span>
+                                    <span class="cert-detail">⏱ {{ cert.duration }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="section-empty">No specific certifications recommended at this time.</p>
+                    {% endif %}
+                </article>
+
+                {# Resume Professional Summary Generator #}
+                {% if history_record %}
+                <article class="result-section wide-section" style="margin-bottom:16px">
+                    <h2 class="section-heading"><span class="section-icon">📝</span> Professional Summary Generator</h2>
+                    <div class="summary-gen-card">
+                        <p>Generate a polished 3-sentence "About Me" paragraph tailored to your resume and target role — ready to paste at the top of your resume.</p>
+                        <button class="btn-download" id="gen-summary-btn" data-record-id="{{ history_record.id }}">✦ Generate My Summary</button>
+                        <div class="summary-result-box" id="summary-result-box"></div>
+                    </div>
+                </article>
+                {% endif %}
+
+                {# Score Sharing Card #}
+                <article class="result-section wide-section">
+                    <h2 class="section-heading"><span class="section-icon">📸</span> Share Your Score</h2>
+                    <p style="font-size:0.87rem;color:var(--tx2);margin-bottom:16px">Screenshot this card and share it on LinkedIn or Instagram to show your resume strength!</p>
+                    <div class="share-card" id="score-share-card">
+                        <p class="share-card-brand">✦ AI Resume Analyzer</p>
+                        {% if history_record %}
+                        <div class="share-role-badge">🎯 {{ history_record.target_role }}</div>
+                        {% endif %}
+                        <div class="share-scores-row">
+                            <div class="share-score-item">
+                                <span class="share-score-num">{{ analysis.ats_score }}%</span>
+                                <span class="share-score-label">ATS Score</span>
+                            </div>
+                            <div class="share-score-item">
+                                <span class="share-score-num">{{ analysis.job_match_score }}%</span>
+                                <span class="share-score-label">Job Match</span>
+                            </div>
+                            <div class="share-score-item">
+                                <span class="share-score-num">{{ analysis.role_fit_score }}%</span>
+                                <span class="share-score-label">Role Fit</span>
+                            </div>
+                        </div>
+                        <p class="share-footer">Free at resumeai.app &nbsp;·&nbsp; No signup needed</p>
+                    </div>
+                    <div class="share-actions">
+                        <button class="btn-copy" id="copy-share-btn">📋 Copy Score Text</button>
+                    </div>
+                </article>
+
+            </div>
+
+            {# ══════════ TAB 3 — INTERVIEW PREP ══════════ #}
+            <div class="tab-panel" id="tab-interview" role="tabpanel" hidden>
+
+                <div class="result-section wide-section">
+                    <div class="interview-top" style="margin-bottom:20px">
+                        <div class="interview-top-text">
+                            <h2 class="section-heading"><span class="section-icon">🎤</span> Interview Preparation</h2>
+                            <p class="interview-subtitle">High-probability questions for both interview rounds, with sample answers tailored to your resume.</p>
+                        </div>
+                        {% if history_record %}
+                            <a class="btn-download" href="{{ url_for('download_interview_pdf', record_id=history_record.id) }}">↓ Download PDF</a>
+                        {% endif %}
+                    </div>
+
+                    {# Sub-tabs: HR vs Technical #}
+                    {% set has_new_format = analysis.hr_questions or analysis.technical_questions %}
+                    {% if has_new_format %}
+                        <div class="subtab-nav" role="tablist" aria-label="Interview round">
+                            <button role="tab" class="subtab-btn active" data-subtab="hr" aria-selected="true">👔 HR Round</button>
+                            <button role="tab" class="subtab-btn"        data-subtab="tech" aria-selected="false">⚙️ Technical Round</button>
+                        </div>
+
+                        <div class="subtab-panel" id="subtab-hr" role="tabpanel">
+                            {% if analysis.hr_questions %}
+                                <div class="qa-list">
+                                    {% for item in analysis.hr_questions %}
+                                        <details class="qa-item">
+                                            <summary>
+                                                <span class="qa-num">{{ loop.index }}</span>
+                                                <div class="qa-content">
+                                                    <span class="qa-area">HR Question</span>
+                                                    <span class="qa-question">{{ item.question }}</span>
+                                                </div>
+                                                <span class="qa-chevron">›</span>
+                                            </summary>
+                                            <div class="qa-answer-wrap">
+                                                <span class="qa-answer-label">Sample Answer</span>
+                                                <p class="qa-answer-text">{{ item.answer }}</p>
+                                            </div>
+                                        </details>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="section-empty">No HR questions were generated.</p>
                             {% endif %}
                         </div>
-                    </article>
+
+                        <div class="subtab-panel" id="subtab-tech" role="tabpanel" hidden>
+                            {% if analysis.technical_questions %}
+                                <div class="qa-list">
+                                    {% for item in analysis.technical_questions %}
+                                        <details class="qa-item">
+                                            <summary>
+                                                <span class="qa-num">{{ loop.index }}</span>
+                                                <div class="qa-content">
+                                                    <span class="qa-area">{{ item.focus_area }}</span>
+                                                    <span class="qa-question">{{ item.question }}</span>
+                                                </div>
+                                                <span class="qa-chevron">›</span>
+                                            </summary>
+                                            <div class="qa-answer-wrap">
+                                                <span class="qa-answer-label">Sample Answer</span>
+                                                <p class="qa-answer-text">{{ item.answer }}</p>
+                                            </div>
+                                        </details>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="section-empty">No technical questions were generated.</p>
+                            {% endif %}
+                        </div>
+
+                    {% else %}
+                        {# Legacy format fallback #}
+                        {% if analysis.interview_questions %}
+                            <div class="qa-list">
+                                {% for item in analysis.interview_questions %}
+                                    <details class="qa-item">
+                                        <summary>
+                                            <span class="qa-num">{{ loop.index }}</span>
+                                            <div class="qa-content">
+                                                <span class="qa-area">{{ item.focus_area }}</span>
+                                                <span class="qa-question">{{ item.question }}</span>
+                                            </div>
+                                            <span class="qa-chevron">›</span>
+                                        </summary>
+                                        <div class="qa-answer-wrap">
+                                            <span class="qa-answer-label">Sample Answer</span>
+                                            <p class="qa-answer-text">{{ item.answer }}</p>
+                                        </div>
+                                    </details>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="section-empty">No interview questions were generated.</p>
+                        {% endif %}
+                    {% endif %}
                 </div>
 
-                <a class="back-link" href="/">Analyze Another Resume</a>
-            {% endif %}
+            </div>
 
-        </section>
-    </main>
+            {# ══════════ TAB 4 — COVER LETTER ══════════ #}
+            <div class="tab-panel" id="tab-cover" role="tabpanel" hidden>
+                {% if history_record %}
+                    <div class="cover-cta-card">
+                        <div class="cover-cta-text">
+                            <h2>Generate Your Cover Letter</h2>
+                            <p>A personalized, professional cover letter generated from your resume and target role — ready to copy and customize.</p>
+                            <div class="cover-cta-features">
+                                <span class="cover-feature">Tailored to your specific skills and projects</span>
+                                <span class="cover-feature">3-paragraph professional structure</span>
+                                <span class="cover-feature">Ready to copy and paste instantly</span>
+                            </div>
+                        </div>
+                        <a class="btn-download" href="{{ url_for('cover_letter', record_id=history_record.id) }}">
+                            ✦ Generate Cover Letter
+                        </a>
+                    </div>
+                {% else %}
+                    <p class="section-empty">Cover letter generation is not available for this report.</p>
+                {% endif %}
+            </div>
 
+        </div>{# end .result-tabs #}
+
+        <a class="btn-back" href="/">← Analyze Another Resume</a>
+
+        {% endif %}
+
+    </section>
+</main>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
