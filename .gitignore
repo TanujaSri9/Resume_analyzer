@@ -5,6 +5,7 @@
 # ── user data (never commit) ───────────────────────────
 data/history.json
 data/.secret_key
+!data/.gitkeep
 
 # ── uploaded files ─────────────────────────────────────
 uploads/*
