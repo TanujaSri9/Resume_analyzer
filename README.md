@@ -1,70 +1,47 @@
-# AI Resume Analyzer 🎯
+# AI Resume Analyzer
 
-An AI-powered resume analyzer built for students and freshers. Get your ATS score, job match analysis, interview prep, skill roadmap, cover letter, and practice with a live mock interview — all in 30 seconds. **Free. No signup.**
+A Flask web app that analyzes PDF resumes with NVIDIA Nemotron and generates ATS-style feedback, job-description matching, role-fit scoring, interview preparation, and saved report history.
 
-## ✦ Features
+## Features
 
-| Feature | Description |
-|---|---|
-| 📊 **ATS Score** | See how ATS bots rate your resume |
-| 🎯 **Job Match** | Paste a JD for precise keyword alignment |
-| 🎤 **Interview Prep** | HR + Technical questions with sample answers |
-| 🗺️ **Skill Roadmap** | Prioritised learning plan with free resources |
-| 🏅 **Certifications** | Role-specific cert recommendations |
-| ✏️ **Project Enhancer** | AI rewrites weak project descriptions |
-| 📝 **Cover Letter** | One-click personalised cover letter |
-| 📝 **Summary Generator** | 3-sentence professional "About Me" paragraph |
-| 🤖 **Mock Interview** | Live AI interview with per-answer feedback & score |
+- PDF resume upload and text extraction
+- Role-based resume analysis
+- Job description matching
+- ATS score, job match score, and role fit score
+- Strengths, weaknesses, missing skills, matched keywords, and improvement suggestions
+- Resume-specific interview questions with interviewer-friendly sample answers
+- Interview Q&A PDF download
+- Local analysis history
+- Loading overlay while analysis is running
 
-## 🚀 Getting Started (Local)
+## Setup
+
+1. Install dependencies:
 
 ```bash
-# 1. Clone the repo
-git clone https://github.com/YOUR_USERNAME/ai-resume-analyzer.git
-cd ai-resume-analyzer
-
-# 2. Install dependencies
 pip install -r requirements.txt
-
-# 3. Set up environment variables
-copy .env.example .env
-# Edit .env and add your NVIDIA_API_KEY
-
-# 4. Run the app
-python app.py         # dev mode
-python run.py         # production mode (Waitress)
 ```
 
-Open [http://localhost:5000](http://localhost:5000)
+2. Create a `.env` file from `.env.example` and add your NVIDIA API key:
 
-## 🔑 Environment Variables
-
-Create a `.env` file (see `.env.example`):
-
-```
-NVIDIA_API_KEY=nvapi-your-key-here
+```bash
+NVIDIA_API_KEY=your_api_key_here
 NVIDIA_MODEL=nvidia/nemotron-3-nano-30b-a3b
 NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
-SITE_URL=https://your-deployed-url.com
-SECRET_KEY=your-random-secret-key
 ```
 
-Get your free NVIDIA API key at: [build.nvidia.com](https://build.nvidia.com)
+3. Run the app:
 
-## 🏗️ Tech Stack
+```bash
+python app.py
+```
 
-- **Backend** — Python, Flask, Flask-Limiter
-- **AI** — NVIDIA NIM API (Nemotron)
-- **PDF/DOCX** — pdfplumber, python-docx
-- **Frontend** — Vanilla HTML, CSS, JavaScript
-- **Production** — Waitress WSGI
+4. Open:
 
-## 🔒 Privacy
+```text
+http://127.0.0.1:5000/
+```
 
-- Uploaded resumes are **deleted immediately** after text extraction
-- No resume file is ever stored on disk beyond a few seconds
-- History is private to each browser session — no shared data
+## Privacy Notes
 
-## 📄 License
-
-MIT — free to use, modify, and deploy.
+The app stores analysis history locally in `data/history.json`. This file is ignored by Git because it can contain resume and job-description information.

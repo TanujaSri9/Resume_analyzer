@@ -1,31 +1,7 @@
-# ── Secrets — NEVER commit these ───────────────────────────────
 .env
-data/.secret_key
-
-# ── Python ─────────────────────────────────────────────────────
 __pycache__/
-*.py[cod]
-*.pyo
-*.egg-info/
-dist/
-build/
-
-# ── Virtual environments ────────────────────────────────────────
-venv/
-env/
-.venv/
-
-# ── Uploaded files (user resumes) ──────────────────────────────
+*.pyc
+data/history.json
+server.*.log
 uploads/*
 !uploads/.gitkeep
-
-# ── History data ────────────────────────────────────────────────
-data/history.json
-
-# ── OS & editor ─────────────────────────────────────────────────
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-*.swp
-*.log
