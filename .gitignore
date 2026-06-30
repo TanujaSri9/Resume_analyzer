@@ -2,6 +2,8 @@
 __pycache__/
 *.pyc
 data/history.json
+data/.secret_key
+*.log
 server.*.log
 uploads/*
 !uploads/.gitkeep
