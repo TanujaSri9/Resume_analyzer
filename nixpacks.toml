@@ -1,0 +1,13 @@
+# nixpacks.toml — Explicit Railway/Nixpacks build configuration
+# This overrides auto-detection and guarantees the correct Python version and build steps.
+
+[phases.setup]
+# python311 is the Nix package name for Python 3.11.
+# gcc is required by some pip packages that compile C extensions.
+nixPkgs = ["python311", "gcc"]
+
+[phases.install]
+cmds = ["pip install --upgrade pip", "pip install -r requirements.txt"]
+
+[start]
+cmd = "python run.py"
