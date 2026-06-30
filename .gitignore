@@ -1,9 +1,41 @@
+# ── secrets & environment ──────────────────────────────
 .env
-__pycache__/
-*.pyc
+*.env
+
+# ── user data (never commit) ───────────────────────────
 data/history.json
 data/.secret_key
-*.log
-server.*.log
+
+# ── uploaded files ─────────────────────────────────────
 uploads/*
 !uploads/.gitkeep
+
+# ── Python cache ───────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── virtual environments ───────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ── IDE & OS files ─────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── logs ──────────────────────────────────────────────
+*.log
+server.*.log
