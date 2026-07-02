@@ -11,6 +11,7 @@ import os
 import json
 import textwrap
 import logging
+import re
 
 # ── optional deps ──────────────────────────────────────────────
 try:
@@ -190,6 +191,58 @@ def extract_json_object(text: str) -> dict:
         if start == -1 or end == -1 or end <= start:
             raise
         return json.loads(text[start: end + 1])
+
+
+def clean_generation_text(text: str) -> str:
+    """Strip out any model self-correction, drafting notes, or word-counting comments."""
+    lines = text.split("\n")
+    cleaned_lines = []
+    
+    planning_markers = [
+        "we need to", "let's craft", "let's draft", "word count",
+        "i'll write and then", "drafting notes", "let's count", "that's 11 words", 
+        "that's maybe", "read through my prompt", "key strengths:", "let's write",
+        "let's draft", "let's aim", "aim for ~"
+    ]
+    
+    for line in lines:
+        line_strip = line.strip()
+        if not line_strip:
+            cleaned_lines.append("")
+            continue
+            
+        line_lower = line_strip.lower()
+        
+        # 1. If the line contains a long quote, let's extract it (this is the actual content)
+        quotes = re.findall(r'"([^"]{25,})"', line_strip)
+        if quotes:
+            for q in quotes:
+                cleaned_lines.append(q.strip())
+            continue
+            
+        # 2. Skip lines that are just numbers/counting or planning commentary
+        if "i(1)" in line_lower or "am2" in line_lower or "react,7" in line_lower or "count words:" in line_lower:
+            continue
+            
+        if any(marker in line_lower for marker in planning_markers):
+            continue
+            
+        # 3. Clean common prefixes from the line
+        line_clean = re.sub(r'^(Paragraph \d+:|Sentence \d+:|Draft:|Quote:)\s*', '', line_strip, flags=re.IGNORECASE)
+        
+        # If the line is wrapped in quotes, strip them
+        if line_clean.startswith('"') and line_clean.endswith('"'):
+            line_clean = line_clean[1:-1].strip()
+        elif line_clean.startswith("'") and line_clean.endswith("'"):
+            line_clean = line_clean[1:-1].strip()
+            
+        if line_clean:
+            cleaned_lines.append(line_clean)
+            
+    # Combine back and clean up consecutive empty lines
+    result = "\n".join(cleaned_lines)
+    result = re.sub(r'\n{3,}', '\n\n', result)
+    return result.strip()
 
 
 def create_nvidia_chat_completion(messages: list, max_tokens: int = 4096) -> str:
@@ -385,7 +438,7 @@ GENERATE:
 - project_tips: up to 3 — find weak project bullets and rewrite them (original, improved, why)
 - quantification_tips: up to 3 — find bullets lacking metrics (original, suggested with ~estimates, metric_hint)
 - skill_roadmap: up to 5 — priority (High/Medium/Low), weeks (int), free resource name
-- certifications: up to 4 — real certifications with name, provider, skill covered, is_free, duration
+- certifications: up to 4 — real FUTURE certifications (different from any certifications already listed on the resume) with name, provider, skill covered, is_free, duration. Only suggest certifications they have NOT done yet to help fill their skill gaps for the target role.
 
 Resume:
 {resume_text[:14000]}
@@ -411,25 +464,37 @@ def generate_cover_letter_with_nvidia(analysis: dict, target_role: str, jd_previ
     strengths = ", ".join(analysis.get("strengths", [])[:3]) or "strong technical skills"
     role = target_role or analysis.get("target_role", "this role")
 
-    prompt = f"""Write a professional cover letter (3 paragraphs, 260-320 words) for a student/fresher applying to: {role}
+    prompt = f"""Write a professional cover letter for a student/fresher candidate.
 
+Role: {role}
 Key strengths: {strengths}
 Job context: {jd_preview or f"General application for {role}"}
 
+Instructions:
+1. Write EXACTLY 3 paragraphs (total 260-320 words).
+2. Do NOT write any greetings, address headers, dates, contact details, signing-off headers, drafting notes, word counts, or chain-of-thought.
+3. Start IMMEDIATELY with the first word of the cover letter.
+4. Avoid placeholders like [Company Name]. If company name is not available, refer generically to "your company", "your team", or "your organization".
+5. Keep the tone professional, confident, and genuine.
+
 Paragraph 1: Engaging hook — why this specific role excites them.
 Paragraph 2: 2-3 most relevant skills/projects matching the role.
-Paragraph 3: Enthusiasm, openness to interview, polite call to action.
+Paragraph 3: Enthusiasm, openness to interview, polite call to action."""
 
-Tone: Professional, confident, genuine. No clichés. No placeholder text like [Company Name].
-Return ONLY the cover letter body (no headers, no date, no address)."""
+    system_msg = (
+        "You are a professional career coach. You write ONLY the final cover letter body text. "
+        "You NEVER output greeting headers, addresses, signature blocks, drafting notes, self-correction, or word counts. "
+        "Your response must start directly with the first sentence of the cover letter."
+    )
 
-    return create_nvidia_chat_completion(
+    raw_text = create_nvidia_chat_completion(
         [
-            {"role": "system", "content": "You are a professional career coach who writes compelling, specific cover letters for students."},
+            {"role": "system", "content": system_msg},
             {"role": "user", "content": prompt},
         ],
         max_tokens=1024,
     )
+    return clean_generation_text(raw_text)
 
 
 # ════════════════════════════════════════════════════════════════
@@ -441,25 +506,37 @@ def generate_professional_summary_text(analysis: dict, target_role: str) -> str:
     skills    = ", ".join(analysis.get("matched_keywords", [])[:6]) or "relevant technical skills"
     role      = target_role or analysis.get("target_role", "the target role")
 
-    prompt = f"""Write a professional resume summary (3 sentences, 65-85 words) for a candidate applying to: {role}
+    prompt = f"""Write a professional resume summary/career objective for a student/fresher applying for: {role}
 
-Key strengths: {strengths}
-Core skills: {skills}
+Resume details to base it on:
+- Top Strengths: {strengths}
+- Core Skills: {skills}
 
-Sentence 1: Professional identity + specialization (no years of experience if fresher).
-Sentence 2: Key technical skills and a notable project/achievement.
-Sentence 3: Career goal aligned with the target role.
+Instructions:
+1. Write EXACTLY 3 sentences (65-85 words total).
+2. Write in first person (using "I", "my", "me").
+3. Do NOT include any self-correction, drafting steps, headers, bullet points, numbers, word-counts, introductory text, or concluding notes.
+4. Start IMMEDIATELY with the first word of the summary paragraph.
+5. The summary must be highly professional and tailored to be ATS-friendly.
 
-Write in first person. Be specific and confident. Avoid generic phrases.
-Return ONLY the 3-sentence summary paragraph."""
+Sentence 1: Professional identity + specialization.
+Sentence 2: Key technical skills and a notable project or achievement.
+Sentence 3: Career goal aligned with the target role."""
 
-    return create_nvidia_chat_completion(
+    system_msg = (
+        "You are an expert resume writer. You output ONLY the final resume summary text. "
+        "You NEVER write comments, drafting steps, chain-of-thought, or word counts. "
+        "If you do, you fail. Your output must start directly with the first sentence."
+    )
+
+    raw_text = create_nvidia_chat_completion(
         [
-            {"role": "system", "content": "You are an expert resume writer specialising in student career profiles."},
+            {"role": "system", "content": system_msg},
             {"role": "user", "content": prompt},
         ],
         max_tokens=256,
     )
+    return clean_generation_text(raw_text)
 
 
 # ════════════════════════════════════════════════════════════════

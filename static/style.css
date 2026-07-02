@@ -2544,3 +2544,438 @@ textarea:focus {
   margin-top: 16px;
   display: none;
 }
+
+/* ============================================================
+   LIGHT THEME OVERRIDES
+   ============================================================ */
+
+/* 1. Variables override */
+:root.light, body.light-theme, html.light-theme {
+  --bg:          #f8fafc;
+  --surface:     #ffffff;
+  --card:        rgba(15, 23, 42, 0.04);
+  --card-hover:  rgba(15, 23, 42, 0.07);
+  --border:      rgba(15, 23, 42, 0.08);
+  --border-s:    rgba(15, 23, 42, 0.14);
+
+  --tx1: #0f172a;
+  --tx2: #475569;
+  --tx3: #64748b;
+
+  /* Richer, higher-contrast colors for typography in light theme */
+  --sky:      #0284c7;
+  --sky-d:    rgba(2, 132, 199, 0.07);
+  --sky-b:    rgba(2, 132, 199, 0.22);
+
+  --indigo:   #4f46e5;
+  --indigo-d: rgba(79, 70, 229, 0.07);
+  --indigo-b: rgba(79, 70, 229, 0.22);
+
+  --green:    #16a34a;
+  --green-d:  rgba(22, 163, 74, 0.07);
+  --green-b:  rgba(22, 163, 74, 0.22);
+
+  --amber:    #ea580c;
+  --amber-d:  rgba(234, 88, 12, 0.07);
+  --amber-b:  rgba(234, 88, 12, 0.22);
+
+  --rose:     #dc2626;
+  --rose-d:   rgba(220, 38, 38, 0.07);
+  --rose-b:   rgba(220, 38, 38, 0.22);
+
+  --blue:     #2563eb;
+  --blue-d:   rgba(37, 99, 235, 0.07);
+  --blue-b:   rgba(37, 99, 235, 0.22);
+
+  --sh:    0 4px 20px rgba(15, 23, 42, 0.06);
+  --sh-lg: 0 12px 40px rgba(15, 23, 42, 0.08);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not(.dark-theme) {
+    --bg:          #f8fafc;
+    --surface:     #ffffff;
+    --card:        rgba(15, 23, 42, 0.04);
+    --card-hover:  rgba(15, 23, 42, 0.07);
+    --border:      rgba(15, 23, 42, 0.08);
+    --border-s:    rgba(15, 23, 42, 0.14);
+
+    --tx1: #0f172a;
+    --tx2: #475569;
+    --tx3: #64748b;
+
+    --sky:      #0284c7;
+    --sky-d:    rgba(2, 132, 199, 0.07);
+    --sky-b:    rgba(2, 132, 199, 0.22);
+
+    --indigo:   #4f46e5;
+    --indigo-d: rgba(79, 70, 229, 0.07);
+    --indigo-b: rgba(79, 70, 229, 0.22);
+
+    --green:    #16a34a;
+    --green-d:  rgba(22, 163, 74, 0.07);
+    --green-b:  rgba(22, 163, 74, 0.22);
+
+    --amber:    #ea580c;
+    --amber-d:  rgba(234, 88, 12, 0.07);
+    --amber-b:  rgba(234, 88, 12, 0.22);
+
+    --rose:     #dc2626;
+    --rose-d:   rgba(220, 38, 38, 0.07);
+    --rose-b:   rgba(220, 38, 38, 0.22);
+
+    --blue:     #2563eb;
+    --blue-d:   rgba(37, 99, 235, 0.07);
+    --blue-b:   rgba(37, 99, 235, 0.22);
+
+    --sh:    0 4px 20px rgba(15, 23, 42, 0.06);
+    --sh-lg: 0 12px 40px rgba(15, 23, 42, 0.08);
+  }
+}
+
+/* 2. Visual elements override */
+body.light-theme,
+html.light-theme,
+body.light-theme input,
+body.light-theme select,
+body.light-theme textarea {
+  color-scheme: light;
+}
+
+/* Base Body light override */
+body.light-theme {
+  background:
+    radial-gradient(ellipse 80% 60% at 12% -5%,  rgba(2, 132, 199, 0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 55% at 88% 108%, rgba(79, 70, 229, 0.08) 0%, transparent 55%),
+    linear-gradient(160deg, #f8fafc 0%, #f1f5f9 55%, #e2e8f0 100%) !important;
+  color: var(--tx1) !important;
+}
+
+@media (prefers-color-scheme: light) {
+  body:not(.dark-theme) {
+    background:
+      radial-gradient(ellipse 80% 60% at 12% -5%,  rgba(2, 132, 199, 0.06) 0%, transparent 55%),
+      radial-gradient(ellipse 65% 55% at 88% 108%, rgba(79, 70, 229, 0.08) 0%, transparent 55%),
+      linear-gradient(160deg, #f8fafc 0%, #f1f5f9 55%, #e2e8f0 100%) !important;
+    color: var(--tx1) !important;
+  }
+}
+
+/* Typography elements */
+body.light-theme h1,
+body.light-theme .hero-headline {
+  background: linear-gradient(135deg, #0f172a 0%, #334155 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+body.light-theme .hero-gradient {
+  background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+@media (prefers-color-scheme: light) {
+  body:not(.dark-theme) h1,
+  body:not(.dark-theme) .hero-headline {
+    background: linear-gradient(135deg, #0f172a 0%, #334155 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+
+  body:not(.dark-theme) .hero-gradient {
+    background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+}
+
+/* Navigation elements */
+body.light-theme .site-header,
+body.light-theme .top-nav {
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom-color: var(--border);
+}
+
+body.light-theme .nav-link {
+  color: var(--tx2);
+}
+
+body.light-theme .nav-link:hover {
+  color: var(--tx1);
+  background: rgba(15, 23, 42, 0.05);
+}
+
+body.light-theme .nav-highlight {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.08);
+  border-color: rgba(2, 132, 199, 0.22);
+}
+
+body.light-theme .nav-highlight:hover {
+  background: rgba(2, 132, 199, 0.14);
+}
+
+@media (prefers-color-scheme: light) {
+  body:not(.dark-theme) .site-header,
+  body:not(.dark-theme) .top-nav {
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom-color: var(--border);
+  }
+
+  body:not(.dark-theme) .nav-link {
+    color: var(--tx2);
+  }
+
+  body:not(.dark-theme) .nav-link:hover {
+    color: var(--tx1);
+    background: rgba(15, 23, 42, 0.05);
+  }
+
+  body:not(.dark-theme) .nav-highlight {
+    color: #0284c7;
+    background: rgba(2, 132, 199, 0.08);
+    border-color: rgba(2, 132, 199, 0.22);
+  }
+
+  body:not(.dark-theme) .nav-highlight:hover {
+    background: rgba(2, 132, 199, 0.14);
+  }
+}
+
+/* Container & Cards override */
+body.light-theme .container,
+body.light-theme .results-card {
+  background: rgba(255, 255, 255, 0.90) !important;
+  border-color: var(--border-s) !important;
+  box-shadow: 0 12px 48px rgba(15, 23, 42, 0.08) !important;
+}
+
+body.light-theme .feature-card,
+body.light-theme .step-item,
+body.light-theme .faq-item,
+body.light-theme .score-panel,
+body.light-theme .result-section,
+body.light-theme .roadmap-item,
+body.light-theme .cert-card,
+body.light-theme .history-item {
+  background: #ffffff !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.02) !important;
+}
+
+body.light-theme .feature-card:hover,
+body.light-theme .step-item:hover,
+body.light-theme .faq-item[open],
+body.light-theme .history-item:hover {
+  border-color: var(--border-s) !important;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05) !important;
+}
+
+body.light-theme .feature-card-highlight {
+  background: rgba(79, 70, 229, 0.02) !important;
+  border-color: var(--indigo-b) !important;
+}
+
+@media (prefers-color-scheme: light) {
+  body:not(.dark-theme) .container,
+  body:not(.dark-theme) .results-card {
+    background: rgba(255, 255, 255, 0.90) !important;
+    border-color: var(--border-s) !important;
+    box-shadow: 0 12px 48px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  body:not(.dark-theme) .feature-card,
+  body:not(.dark-theme) .step-item,
+  body:not(.dark-theme) .faq-item,
+  body:not(.dark-theme) .score-panel,
+  body:not(.dark-theme) .result-section,
+  body:not(.dark-theme) .roadmap-item,
+  body:not(.dark-theme) .cert-card,
+  body:not(.dark-theme) .history-item {
+    background: #ffffff !important;
+    border-color: var(--border) !important;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.02) !important;
+  }
+}
+
+/* Inputs and Forms override */
+body.light-theme select,
+body.light-theme textarea,
+body.light-theme input[type="text"] {
+  background: #ffffff !important;
+  border-color: var(--border-s) !important;
+  color: var(--tx1) !important;
+}
+
+body.light-theme select:focus,
+body.light-theme textarea:focus,
+body.light-theme input[type="text"]:focus {
+  border-color: var(--sky) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12) !important;
+}
+
+@media (prefers-color-scheme: light) {
+  body:not(.dark-theme) select,
+  body:not(.dark-theme) textarea,
+  body:not(.dark-theme) input[type="text"] {
+    background: #ffffff !important;
+    border-color: var(--border-s) !important;
+    color: var(--tx1) !important;
+  }
+}
+
+/* Rings inside score rings */
+body.light-theme .ring-bg {
+  stroke: rgba(15, 23, 42, 0.06) !important;
+}
+
+@media (prefers-color-scheme: light) {
+  body:not(.dark-theme) .ring-bg {
+    stroke: rgba(15, 23, 42, 0.06) !important;
+  }
+}
+
+/* Tab styling overrides */
+body.light-theme .tab-btn.active {
+  color: #0284c7 !important;
+  border-bottom-color: #0284c7 !important;
+  background: rgba(2, 132, 199, 0.04) !important;
+}
+
+body.light-theme .subtab-btn.active {
+  color: #0284c7 !important;
+  background: rgba(2, 132, 199, 0.06) !important;
+  border-color: rgba(2, 132, 199, 0.22) !important;
+}
+
+@media (prefers-color-scheme: light) {
+  body:not(.dark-theme) .tab-btn.active {
+    color: #0284c7 !important;
+    border-bottom-color: #0284c7 !important;
+    background: rgba(2, 132, 199, 0.04) !important;
+  }
+}
+
+/* Mock Interview Banner & Chat Overrides */
+body.light-theme .mock-banner {
+  background: rgba(79, 70, 229, 0.02) !important;
+}
+
+body.light-theme .mock-banner-tag {
+  background: rgba(79, 70, 229, 0.06) !important;
+  border-color: var(--indigo-b) !important;
+  color: var(--indigo) !important;
+}
+
+body.light-theme .chat-messages {
+  background: #ffffff !important;
+}
+
+body.light-theme .chat-msg-bubble.bubble-ai {
+  background: rgba(15, 23, 42, 0.03) !important;
+  border-color: var(--border) !important;
+  color: var(--tx1) !important;
+}
+
+body.light-theme .chat-msg-bubble.bubble-user {
+  background: rgba(2, 132, 199, 0.06) !important;
+  border-color: var(--sky-b) !important;
+  color: #0284c7 !important;
+}
+
+body.light-theme .chat-msg-bubble.bubble-feedback {
+  background: rgba(22, 163, 74, 0.04) !important;
+  border-color: var(--green-b) !important;
+  color: #16a34a !important;
+}
+
+@media (prefers-color-scheme: light) {
+  body:not(.dark-theme) .chat-messages {
+    background: #ffffff !important;
+  }
+  body:not(.dark-theme) .chat-msg-bubble.bubble-ai {
+    background: rgba(15, 23, 42, 0.03) !important;
+    border-color: var(--border) !important;
+    color: var(--tx1) !important;
+  }
+}
+
+/* Share Card Light style */
+body.light-theme .share-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #f1f5f9 100%) !important;
+}
+
+body.light-theme .share-card::before {
+  background: radial-gradient(ellipse at center, rgba(79, 70, 229, 0.15) 0%, transparent 70%) !important;
+}
+
+/* Upload box overrides */
+body.light-theme .upload-box {
+  background: rgba(15, 23, 42, 0.01) !important;
+  border-color: var(--border-s) !important;
+}
+
+body.light-theme .upload-box:hover,
+body.light-theme .upload-box.drag-over {
+  border-color: var(--sky) !important;
+  background: rgba(2, 132, 199, 0.02) !important;
+}
+
+body.light-theme .upload-icon-badge {
+  background: rgba(15, 23, 42, 0.04) !important;
+  border-color: var(--border) !important;
+}
+
+/* FAQ item fixes */
+body.light-theme .faq-item summary::after {
+  color: var(--tx3);
+}
+
+body.light-theme .faq-item[open] summary::after {
+  color: var(--sky);
+}
+
+/* Toggle Switch adjustment */
+body.light-theme .toggle-knob {
+  background-color: #cbd5e1;
+}
+
+body.light-theme .toggle-switch input:checked + .toggle-knob {
+  background-color: #0284c7;
+}
+
+/* Theme Toggle Button Style */
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 1.15rem;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 150ms, transform 150ms;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: scale(1.08);
+}
+
+body.light-theme .theme-toggle-btn:hover {
+  background: rgba(15, 23, 42, 0.06);
+}
+
+@media (prefers-color-scheme: light) {
+  body:not(.dark-theme) .theme-toggle-btn:hover {
+    background: rgba(15, 23, 42, 0.06);
+  }
+}
+

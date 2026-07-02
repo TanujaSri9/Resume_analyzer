@@ -1,4 +1,29 @@
 /* =============================================================
+   THEME TOGGLER
+   ============================================================= */
+(function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+    } else if (savedTheme === 'dark') {
+        document.body.classList.remove('light-theme');
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.body.classList.add('light-theme');
+    }
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+            localStorage.setItem('theme', currentTheme);
+        });
+    }
+});
+
+/* =============================================================
    TIMESTAMP FORMATTING  (all pages)
    ============================================================= */
 document.querySelectorAll('[data-ts]').forEach(el => {
